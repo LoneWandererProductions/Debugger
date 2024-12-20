@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35527.113 d17.12
+VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Debugger", "Debugger\Debugger.csproj", "{9DA62443-373A-4230-A1DF-4B92A2F28031}"
 EndProject
@@ -12,6 +12,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonControls", "CommonControls\CommonControls.csproj", "{93457656-71A2-44CD-BA85-6186B7B2120D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ViewModel", "ViewModel\ViewModel.csproj", "{AA632F74-CD16-4D26-9A6E-D199DCDC77DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DebuggerTests", "DebuggerTests\DebuggerTests.csproj", "{65480743-2376-4B61-A089-70392529014E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{AA632F74-CD16-4D26-9A6E-D199DCDC77DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA632F74-CD16-4D26-9A6E-D199DCDC77DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA632F74-CD16-4D26-9A6E-D199DCDC77DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65480743-2376-4B61-A089-70392529014E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65480743-2376-4B61-A089-70392529014E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65480743-2376-4B61-A089-70392529014E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65480743-2376-4B61-A089-70392529014E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
