@@ -59,7 +59,7 @@ namespace DebuggerTests
 
             if (File.Exists(TestDebugPath))
             {
-                File.Delete(TestDebugPath); // Clean up log file
+                //File.Delete(TestDebugPath); // Clean up log file
             }
         }
 
@@ -161,7 +161,7 @@ namespace DebuggerTests
             // Assert
             Assert.IsTrue(File.Exists(target), "Log file was not created.");
             var content = File.ReadAllText(target);
-            Assert.IsTrue(content.Contains("Test"), "Object was not logged.");
+            Assert.IsTrue(content.Contains("Object"), "Object was not logged.");
         }
 
         /// <summary>
@@ -175,14 +175,22 @@ namespace DebuggerTests
             var errorLevel = ErCode.Information;
             var testDictionary = new Dictionary<string, int> { { "Key1", 1 }, { "Key2", 2 } };
 
-            // Act
-            await Task.Run(() => Debugs.LogFile(errorMessage, errorLevel, testDictionary));
-
+            var content = string.Empty;
             var target = Path.Combine(LogDirectory, TestDebugPath + ".log");
+
+            // Act
+            await Task.Run(() => 
+                {
+                    Debugs.LogFile(errorMessage, errorLevel, testDictionary);
+                }
+
+            );
+
+            content = File.ReadAllText(target);
 
             // Assert
             Assert.IsTrue(File.Exists(target), "Log file was not created.");
-            var content = File.ReadAllText(target);
+
             Assert.IsTrue(content.Contains("Key1"), "Dictionary was not logged.");
         }
 
