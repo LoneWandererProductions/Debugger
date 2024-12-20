@@ -61,7 +61,7 @@ namespace DebuggerTests
         {
             if (File.Exists(TestDebugPath))
             {
-                //File.Delete(TestDebugPath);
+                File.Delete(TestDebugPath);
             }
         }
 

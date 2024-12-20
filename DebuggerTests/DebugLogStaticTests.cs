@@ -25,12 +25,12 @@ namespace DebuggerTests
         /// <summary>
         /// The test debug path
         /// </summary>
-        private const string TestDebugPath = "test_debug";
+        private const string TestDebugPath = "test_static_debug";
 
         /// <summary>
         /// The delete debug path
         /// </summary>
-        private const string DeleteDebugPath = "delete_debug";
+        private const string DeleteDebugPath = "delete_static_debug";
 
         // The directory where log files are stored
         private static readonly string LogDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DebuggerResources.LogPath);
