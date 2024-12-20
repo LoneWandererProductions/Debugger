@@ -11,6 +11,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace DebuggerTests
 {
@@ -25,6 +26,11 @@ namespace DebuggerTests
         /// </summary>
         private const string TestDebugPath = "test_debug";
 
+
+        /// <summary>
+        /// The delete debug path
+        /// </summary>
+        private const string DeleteDebugPath = "delete_debug";
 
         /// <summary>
         ///     The directory where log files are stored.
@@ -63,30 +69,44 @@ namespace DebuggerTests
         /// Tests the delete log file.
         /// </summary>
         [TestMethod]
-        public void TestDeleteLogFile()
+        public async Task TestDeleteLogFile()
         {
+            DebugRegister.DebugPath = DeleteDebugPath; // Simulate Debug Path
+
+            // Arrange
+            var errorMessage = "Test Error";
+            var errorLevel = ErCode.Error;
+
+            // Act
+            await Task.Run(() => _debugLog.LogFile(errorMessage, errorLevel));
+            
             // Arrange
             File.WriteAllText(TestDebugPath, "Test Content");
 
             // Act
             _debugLog.Delete();
 
+            var target = Path.Combine(LogDirectory, DeleteDebugPath + ".log");
+
             // Assert
-            Assert.IsFalse(File.Exists(TestDebugPath), "Log file was not deleted.");
+            Assert.IsFalse(File.Exists(target), "Log file was not deleted.");
+
+            //restore old path
+            DebugRegister.DebugPath = TestDebugPath; // Simulate Debug Path
         }
 
         /// <summary>
         /// Tests the log file creation.
         /// </summary>
         [TestMethod]
-        public void TestLogFileCreation()
+        public async Task TestLogFileCreation()
         {
             // Arrange
             var errorMessage = "Test Error";
             var errorLevel = ErCode.Error;
 
             // Act
-            _debugLog.LogFile(errorMessage, errorLevel);
+            await Task.Run(() => _debugLog.LogFile(errorMessage, errorLevel));
 
             var target = Path.Combine(LogDirectory, TestDebugPath + ".log");
             // Assert

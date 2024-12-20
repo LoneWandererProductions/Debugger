@@ -80,7 +80,9 @@ namespace Debugger
             _ = DebugProcessing.StopDebuggingAsync();
             try
             {
-                File.Delete(DebugRegister.DebugPath);
+                var logFiles = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DebuggerResources.LogPath, $"{DebugRegister.DebugPath}{DebuggerResources.LogFileExtension}");
+
+                File.Delete(logFiles);
             }
             catch (Exception ex) when (ex is ArgumentException or IOException or UnauthorizedAccessException)
             {

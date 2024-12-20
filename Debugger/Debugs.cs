@@ -1,7 +1,7 @@
 ﻿/*
  * COPYRIGHT:   See COPYING in the top level directory
  * PROJECT:     Debugger
- * FILE:        Debugger/Debug.cs
+ * FILE:        Debugger/Debugs.cs
  * PURPOSE:     Handle the whole Interaction static for ease of use messages
  * PROGRAMER:   Peter Geinitz (Wayfarer)
  */
@@ -14,7 +14,7 @@ namespace Debugger
     /// <summary>
     /// Entry for static Debuging
     /// </summary>
-    public static class Debug
+    public static class Debugs
     {
         /// <summary>
         /// Single instance of DebugLog
@@ -22,9 +22,9 @@ namespace Debugger
         private static readonly Lazy<DebugLog> _debugLog = new(() => new DebugLog());
 
         /// <summary>
-        /// Initializes the <see cref="Debug"/> class.
+        /// Initializes the <see cref="Debugs"/> class.
         /// </summary>
-        static Debug()
+        static Debugs()
         {
             _debugLog.Value.Start();
         }
@@ -38,9 +38,6 @@ namespace Debugger
             _debugLog.Value.StartWindow();
         }
 
-        /// <summary>
-        /// Closes the window.
-        /// </summary>
         public static void CloseWindow()
         {
             _debugLog.Value.CloseWindow();
@@ -120,6 +117,5 @@ namespace Debugger
         {
             _debugLog.Value.Delete();
         }
-
     }
 }
