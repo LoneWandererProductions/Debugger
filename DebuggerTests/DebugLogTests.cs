@@ -110,7 +110,10 @@ namespace DebuggerTests
 
             var target = Path.Combine(LogDirectory, TestDebugPath + ".log");
             // Assert
-            Assert.IsTrue(File.Exists(target), "Log file was not created.");
+            // Assert file existence with polling
+            var fileExists = await WaitForConditionAsync(() => File.Exists(target), TimeSpan.FromSeconds(2));
+            Assert.IsTrue(fileExists, "Log file was not created.");
+
             var content = File.ReadAllText(target);
             Assert.IsTrue(content.Contains(errorMessage), "Error message was not logged.");
         }
@@ -172,6 +175,26 @@ namespace DebuggerTests
             // Assert
             processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(DebuggerResources.TrailWindow));
             Assert.AreEqual(0, processes.Length, "Window process was not closed.");
+        }
+
+        /// <summary>
+        /// Waits for condition asynchronous.
+        /// </summary>
+        /// <param name="condition">The condition.</param>
+        /// <param name="timeout">The timeout.</param>
+        /// <returns>Wait time is over</returns>
+        private static async Task<bool> WaitForConditionAsync(Func<bool> condition, TimeSpan timeout)
+        {
+            var start = DateTime.Now;
+            while ((DateTime.Now - start) < timeout)
+            {
+                if (condition())
+                    return true;
+
+                await Task.Delay(50); // Polling interval
+            }
+
+            return false;
         }
     }
 }

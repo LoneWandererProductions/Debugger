@@ -46,6 +46,7 @@ namespace DebuggerTests
             {
                 File.Delete(TestDebugPath);
             }
+
             DebugRegister.DebugPath = TestDebugPath; // Simulate Debug Path
         }
 
@@ -77,8 +78,11 @@ namespace DebuggerTests
             await Task.Run(() => Debugs.LogFile(errorMessage, errorLevel));
 
             var target = Path.Combine(LogDirectory, TestDebugPath + ".log");
-
             // Assert
+            // Assert file existence with polling
+            var fileExists = await WaitForConditionAsync(() => File.Exists(target), TimeSpan.FromSeconds(2));
+            Assert.IsTrue(fileExists, "Log file was not created.");
+
             Assert.IsTrue(File.Exists(target), "Log file was not created.");
             var content = File.ReadAllText(target);
             Assert.IsTrue(content.Contains(errorMessage), "Error message was not logged.");
@@ -156,10 +160,11 @@ namespace DebuggerTests
             // Act
             await Task.Run(() => Debugs.LogFile(errorMessage, errorLevel, testObject));
 
-            var target = Path.Combine(LogDirectory, TestDebugPath + ".log");
+            var target = Path.Combine(LogDirectory, TestDebugPath + ".log"); // Assert
+            // Assert file existence with polling
+            var fileExists = await WaitForConditionAsync(() => File.Exists(target), TimeSpan.FromSeconds(2));
+            Assert.IsTrue(fileExists, "Log file was not created.");
 
-            // Assert
-            Assert.IsTrue(File.Exists(target), "Log file was not created.");
             var content = File.ReadAllText(target);
             Assert.IsTrue(content.Contains("Object"), "Object was not logged.");
         }
@@ -175,20 +180,18 @@ namespace DebuggerTests
             var errorLevel = ErCode.Information;
             var testDictionary = new Dictionary<string, int> { { "Key1", 1 }, { "Key2", 2 } };
 
-            var content = string.Empty;
+            // Act
+            await Task.Run(() => Debugs.LogFile(errorMessage, errorLevel, testDictionary));
+
             var target = Path.Combine(LogDirectory, TestDebugPath + ".log");
 
-            // Act
-            await Task.Run(() => 
-                {
-                    Debugs.LogFile(errorMessage, errorLevel, testDictionary);
-                }
-
-            );
-
-            content = File.ReadAllText(target);
-
             // Assert
+            // Assert file existence with polling
+            var fileExists = await WaitForConditionAsync(() => File.Exists(target), TimeSpan.FromSeconds(2));
+            Assert.IsTrue(fileExists, "Log file was not created.");
+
+            var content = File.ReadAllText(target);
+
             Assert.IsTrue(File.Exists(target), "Log file was not created.");
 
             Assert.IsTrue(content.Contains("Key1"), "Dictionary was not logged.");
@@ -230,6 +233,27 @@ namespace DebuggerTests
             // Assert
             processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(DebuggerResources.TrailWindow));
             Assert.AreEqual(0, processes.Length, "Window process was not closed.");
+        }
+
+
+        /// <summary>
+        /// Waits for condition asynchronous.
+        /// </summary>
+        /// <param name="condition">The condition.</param>
+        /// <param name="timeout">The timeout.</param>
+        /// <returns>Wait time is over</returns>
+        private static async Task<bool> WaitForConditionAsync(Func<bool> condition, TimeSpan timeout)
+        {
+            var start = DateTime.Now;
+            while ((DateTime.Now - start) < timeout)
+            {
+                if (condition())
+                    return true;
+
+                await Task.Delay(50); // Polling interval
+            }
+
+            return false;
         }
     }
 }
