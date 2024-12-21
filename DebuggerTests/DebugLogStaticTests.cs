@@ -48,6 +48,7 @@ namespace DebuggerTests
             }
 
             DebugRegister.DebugPath = TestDebugPath; // Simulate Debug Path
+            DebugRegister.IsDumpActive = true; // activate dump, my bad....
         }
 
         /// <summary>
@@ -155,7 +156,7 @@ namespace DebuggerTests
             // Arrange
             var errorMessage = "Test Error with Object";
             var errorLevel = ErCode.Warning;
-            var testObject = new { Name = "Test", Value = 42 };
+            var testObject = new LogData { Name = "Test", Value = 42 };
 
             // Act
             await Task.Run(() => Debugs.LogFile(errorMessage, errorLevel, testObject));
@@ -166,7 +167,7 @@ namespace DebuggerTests
             Assert.IsTrue(fileExists, "Log file was not created.");
 
             var content = File.ReadAllText(target);
-            Assert.IsTrue(content.Contains("Object"), "Object was not logged.");
+            Assert.IsTrue(content.Contains("42"), "Object was not logged.");
         }
 
         /// <summary>
@@ -234,6 +235,13 @@ namespace DebuggerTests
             processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(DebuggerResources.TrailWindow));
             Assert.AreEqual(0, processes.Length, "Window process was not closed.");
         }
+
+        public class LogData
+        {
+            public string Name { get; set; }
+            public int Value { get; set; }
+        }
+
 
 
         /// <summary>
