@@ -259,13 +259,10 @@ namespace Debugger
              *  if someone issued the Dump Command so we add everything to the File.
              *  Of course we still Trace everything.
             */
-            if (lvl == 0 && !DebugRegister.IsDumpActive)
+            if (lvl == 0 || DebugRegister.IsDumpActive || DebugRegister.IsVerbose)
             {
-                WriteFile(message);
-            }
-
-            if (DebugRegister.IsDumpActive)
-            {
+                // Write if it's a critical error (lvl == 0).
+                // Write if dump is active or verbose logging is enabled.
                 WriteFile(message);
             }
         }
