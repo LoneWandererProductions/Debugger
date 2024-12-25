@@ -1,17 +1,16 @@
 ﻿/*
  * COPYRIGHT:   See COPYING in the top level directory
  * PROJECT:     DebuggerTests
- * FILE:        DebuggerTests/DebugLogTests.cs
+ * FILE:        DebuggerTests/DebugLogCornerTests.cs
  * PURPOSE:     Tests the Debugger, mostly config file
  * PROGRAMER:   Peter Geinitz (Wayfarer)
  */
 
-using Debugger;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using Debugger;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DebuggerTests
 {
@@ -19,18 +18,9 @@ namespace DebuggerTests
     /// Class that tests all stuff related to log files
     /// </summary>
     [TestClass]
-    public class DebugLogTests
+    [DoNotParallelize]
+    public class DebugLogCornerTests
     {
-        /// <summary>
-        /// The test debug path
-        /// </summary>
-        private const string TestDebugPath = "test_debug";
-
-        /// <summary>
-        /// The delete debug path
-        /// </summary>
-        private const string DeleteDebugPath = "delete_debug";
-
         /// <summary>
         /// The delete debug path
         /// </summary>
@@ -39,147 +29,131 @@ namespace DebuggerTests
         /// <summary>
         ///     The directory where log files are stored.
         /// </summary>
-        private static readonly string LogDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DebuggerResources.LogPath);
+        private static readonly string LogDirectory =
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DebuggerResources.LogPath);
 
         /// <summary>
         /// The debug log
         /// </summary>
         private DebugLog _debugLog;
 
-        /// <summary>
-        /// Setups this instance.
-        /// </summary>
-        [TestInitialize]
-        public void Setup()
+        [TestMethod]
+        [DoNotParallelize]
+        public async Task TestCriticalErrorLogging()
         {
-            _debugLog = new DebugLog();
-            DebugRegister.DebugPath = TestDebugPath; // Simulate Debug Path
-            _debugLog.Start();
-        }
+            var initialDebugPath = DebugRegister.DebugPath;
+            var initialIsDumpActive = DebugRegister.IsDumpActive;
 
-        /// <summary>
-        /// Cleanups this instance.
-        /// </summary>
-        [TestCleanup]
-        public void Cleanup()
-        {
-            if (File.Exists(TestDebugPath))
+            var uniqueLogFilePath = Path.Combine(LogDirectory, nameof(TestCriticalErrorLogging) + ".log");
+
+            try
             {
-                File.Delete(TestDebugPath);
+                DebugRegister.DebugPath = nameof(TestCriticalErrorLogging);
+                DebugRegister.IsDumpActive = false;
+
+                _debugLog = new DebugLog();
+                _debugLog.Start();
+
+                var criticalErrorMessage = "Critical error occurred.";
+                var criticalErrorLevel = ErCode.Error;
+
+                // Act
+                await Task.Run(() => _debugLog.LogFile(criticalErrorMessage, criticalErrorLevel));
+
+                // Assert
+                Assert.IsTrue(await WaitForFileCreationAsync(uniqueLogFilePath), "Log file was not created for critical error.");
+            }
+            finally
+            {
+                DebugRegister.DebugPath = initialDebugPath;
+                DebugRegister.IsDumpActive = initialIsDumpActive;
+
+                if (File.Exists(uniqueLogFilePath))
+                {
+                    File.Delete(uniqueLogFilePath);
+                }
             }
         }
 
-        /// <summary>
-        /// Tests the delete log file.
-        /// </summary>
         [TestMethod]
-        public async Task TestDeleteLogFile()
+        [DoNotParallelize]
+        public async Task TestNonCriticalErrorLoggingInVerboseMode()
         {
-            DebugRegister.DebugPath = DeleteDebugPath; // Simulate Debug Path
+            var initialDebugPath = DebugRegister.DebugPath;
+            var initialIsVerbose = DebugRegister.IsVerbose;
 
-            // Arrange
-            var errorMessage = "Test Error";
-            var errorLevel = ErCode.Error;
+            var uniqueLogFilePath = Path.Combine(LogDirectory, nameof(TestNonCriticalErrorLoggingInVerboseMode) + ".log");
 
-            // Act
-            await Task.Run(() => _debugLog.LogFile(errorMessage, errorLevel));
-            
-            // Arrange
-            File.WriteAllText(TestDebugPath, "Test Content");
+            try
+            {
+                DebugRegister.DebugPath = nameof(TestNonCriticalErrorLoggingInVerboseMode);
+                DebugRegister.IsVerbose = true;
 
-            // Act
-            _debugLog.Delete();
+                _debugLog = new DebugLog();
+                _debugLog.Start();
 
-            var target = Path.Combine(LogDirectory, DeleteDebugPath + ".log");
+                var nonCriticalErrorMessage = "Non-critical error occurred.";
+                var nonCriticalErrorLevel = ErCode.Warning;
 
-            // Assert
-            Assert.IsFalse(await WaitForFileCreationAsync(target), "Log file was not deleted.");
+                // Act
+                await Task.Run(() => _debugLog.LogFile(nonCriticalErrorMessage, nonCriticalErrorLevel));
 
-            //restore old path
-            DebugRegister.DebugPath = TestDebugPath; // Simulate Debug Path
+                // Assert
+                Assert.IsTrue(await WaitForFileCreationAsync(uniqueLogFilePath), "Log file was not created for non-critical error in verbose mode.");
+                var content = await File.ReadAllTextAsync(uniqueLogFilePath);
+                Assert.IsTrue(content.Contains(nonCriticalErrorMessage), "Non-critical error message was not logged in verbose mode.");
+            }
+            finally
+            {
+                DebugRegister.DebugPath = initialDebugPath;
+                DebugRegister.IsVerbose = initialIsVerbose;
+
+                if (File.Exists(uniqueLogFilePath))
+                {
+                    File.Delete(uniqueLogFilePath);
+                }
+            }
         }
 
-        /// <summary>
-        /// Tests the log file creation.
-        /// </summary>
+
         [TestMethod]
-        public async Task TestLogFileCreation()
+        [DoNotParallelize]
+        public async Task TestLogFileBehaviorWithoutVerboseMode()
         {
-            // Arrange
-            var errorMessage = "Test Error";
-            var errorLevel = ErCode.Error;
+            var initialDebugPath = DebugRegister.DebugPath;
+            var initialIsDumpActive = DebugRegister.IsDumpActive;
 
-            // Act
-            await Task.Run(() => _debugLog.LogFile(errorMessage, errorLevel));
+            var uniqueLogFilePath = Path.Combine(LogDirectory, nameof(TestLogFileBehaviorWithoutVerboseMode) + ".log");
 
-            var target = Path.Combine(LogDirectory, TestDebugPath + ".log");
-            // Assert
-            // Assert file existence with polling
-            var fileExists = await WaitForConditionAsync(() => File.Exists(target), TimeSpan.FromSeconds(2));
-            Assert.IsTrue(await WaitForFileCreationAsync(target), "Log file was not created.");
+            try
+            {
+                DebugRegister.DebugPath = nameof(TestLogFileBehaviorWithoutVerboseMode);
+                DebugRegister.IsDumpActive = false;
 
-            var content = File.ReadAllText(target);
-            Assert.IsTrue(content.Contains(errorMessage), "Error message was not logged.");
+                _debugLog = new DebugLog();
+                _debugLog.Start();
+
+                var criticalErrorMessage = "Critical error occurred.";
+                var criticalErrorLevel = ErCode.Error;
+
+                // Act
+                await Task.Run(() => _debugLog.LogFile(criticalErrorMessage, criticalErrorLevel));
+
+                // Assert
+                Assert.IsTrue(await WaitForFileCreationAsync(uniqueLogFilePath), "Log file was not created without verbose mode.");
+            }
+            finally
+            {
+                DebugRegister.DebugPath = initialDebugPath;
+                DebugRegister.IsDumpActive = initialIsDumpActive;
+
+                if (File.Exists(uniqueLogFilePath))
+                {
+                    File.Delete(uniqueLogFilePath);
+                }
+            }
         }
 
-        /// <summary>
-        /// Tests the start stop debugging.
-        /// </summary>
-        [TestMethod]
-        public void TestStartStopDebugging()
-        {
-            // Arrange
-            DebugRegister.IsRunning = false;
-
-            // Act
-            _debugLog.Start();
-            var isRunningAfterStart = DebugRegister.IsRunning;
-
-            _debugLog.StopDebugging();
-            var isRunningAfterStop = DebugRegister.IsRunning;
-
-            // Assert
-            Assert.IsTrue(isRunningAfterStart, "Debugging did not start.");
-            Assert.IsFalse(isRunningAfterStop, "Debugging did not stop.");
-        }
-
-        /// <summary>
-        /// Tests the initiate window.
-        /// </summary>
-        [TestMethod]
-        public void TestInitiateWindow()
-        {
-            // Act
-            _debugLog.StartWindow();
-
-            // Assert
-            var processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(DebuggerResources.TrailWindow));
-            Assert.IsTrue(processes.Length > 0, "Window process was not started.");
-
-            // Cleanup
-            _debugLog.CloseWindow();
-        }
-
-        /// <summary>
-        /// Tests the close window.
-        /// </summary>
-        [TestMethod]
-        public void TestCloseWindow()
-        {
-            // Arrange
-            _debugLog.StartWindow();
-
-            // Assert
-            var processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(DebuggerResources.TrailWindow));
-            Assert.AreEqual(1, processes.Length, "Window process was not started.");
-
-            // Act
-            _debugLog.CloseWindow();
-
-            // Assert
-            processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(DebuggerResources.TrailWindow));
-            Assert.AreEqual(0, processes.Length, "Window process was not closed.");
-        }
 
         /// <summary>
         /// Waits for a file to be created asynchronously.
@@ -189,7 +163,7 @@ namespace DebuggerTests
         /// <returns>True if the file was created; otherwise, false.</returns>
         private static async Task<bool> WaitForFileCreationAsync(string filePath, TimeSpan? timeout = null)
         {
-            var effectiveTimeout = timeout ?? TimeSpan.FromSeconds(10);
+            var effectiveTimeout = timeout ?? TimeSpan.FromSeconds(5);
             var start = DateTime.Now;
 
             while ((DateTime.Now - start) < effectiveTimeout)
@@ -198,27 +172,6 @@ namespace DebuggerTests
                 {
                     return true;
                 }
-
-                await Task.Delay(50); // Polling interval
-            }
-
-            return false;
-        }
-
-
-        /// <summary>
-        /// Waits for condition asynchronous.
-        /// </summary>
-        /// <param name="condition">The condition.</param>
-        /// <param name="timeout">The timeout.</param>
-        /// <returns>Wait time is over</returns>
-        private static async Task<bool> WaitForConditionAsync(Func<bool> condition, TimeSpan timeout)
-        {
-            var start = DateTime.Now;
-            while ((DateTime.Now - start) < timeout)
-            {
-                if (condition())
-                    return true;
 
                 await Task.Delay(50); // Polling interval
             }

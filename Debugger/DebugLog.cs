@@ -39,7 +39,7 @@ namespace Debugger
         public void Start()
         {
             DebugRegister.SuppressWindow = false;
-            DebugProcessing.InitiateDebug();
+            DebugProcessing.StartDebug();
         }
 
         /// <inheritdoc />
@@ -49,7 +49,7 @@ namespace Debugger
         public void StartWindow()
         {
             DebugRegister.SuppressWindow = true;
-            DebugProcessing.InitiateDebug();
+            DebugProcessing.StartDebug();
             InitiateWindow();
         }
 
@@ -60,7 +60,7 @@ namespace Debugger
         public void StopDebugging()
         {
             DebugRegister.IsRunning = false;
-            _ = DebugProcessing.StopDebuggingAsync();
+            DebugProcessing.StopDebuggingClose();
             CloseWindow();
         }
 
@@ -69,7 +69,7 @@ namespace Debugger
         /// </summary>
         public void CreateDump()
         {
-            DebugProcessing.CreateDump();
+            DebugProcessing.DebugFlushActivateDump();
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace Debugger
         /// </summary>
         internal void Delete()
         {
-            _ = DebugProcessing.StopDebuggingAsync();
+            DebugProcessing.StopDebuggingClose();
             try
             {
                 var logFiles = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DebuggerResources.LogPath,
@@ -108,7 +108,8 @@ namespace Debugger
 
             var info = GenerateInfo(methodName, line, file);
 
-            DebugProcessing.CreateLogFile(error, lvl, info);
+            var path = DebugHelper.GetLogFile(DebugRegister.DebugPath);
+            DebugProcessing.DebugLogEntry(error, lvl, info, path);
         }
 
         /// <summary>
@@ -130,7 +131,8 @@ namespace Debugger
 
             var info = GenerateInfo(methodName, line, file);
 
-            DebugProcessing.CreateLogFile(error, lvl, obj, info);
+            var path = DebugHelper.GetLogFile(DebugRegister.DebugPath);
+            DebugProcessing.DebugLogEntry(error, lvl, obj, info, path);
         }
 
         /// <summary>
@@ -152,7 +154,8 @@ namespace Debugger
 
             var info = GenerateInfo(methodName, line, file);
 
-            DebugProcessing.CreateLogFile(error, lvl, objLst, info);
+            var path = DebugHelper.GetLogFile(DebugRegister.DebugPath);
+            DebugProcessing.DebugLogEntry(error, lvl, objLst, info, path);
         }
 
         /// <summary>
@@ -176,7 +179,8 @@ namespace Debugger
 
             var info = GenerateInfo(methodName, line, file);
 
-            DebugProcessing.CreateLogFile(error, lvl, objectDictionary, info);
+            var path = DebugHelper.GetLogFile(DebugRegister.DebugPath);
+            DebugProcessing.DebugLogEntry(error, lvl, objectDictionary, info, path);
         }
 
         /// <summary>
