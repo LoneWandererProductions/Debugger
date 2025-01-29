@@ -71,7 +71,7 @@
             Grid.Column="3"
             Grid.Row="16" Click="BtnSave_Click" Grid.ColumnSpan="5" />
         <Button
-            Content="Cancel"
+            Content="Close"
             Grid.Row="16" Click="BtnCnl_Click" Grid.ColumnSpan="2" Grid.Column="0" />
         <CheckBox Grid.ColumnSpan="5"
                   Grid.Column="3"

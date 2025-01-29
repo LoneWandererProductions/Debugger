@@ -20,7 +20,7 @@ namespace DebuggerTests
     /// static tests
     /// </summary>
     [TestClass]
-    public class DebugLogStaticTests
+    public partial class DebugLogStaticTests
     {
         /// <summary>
         /// The test debug path
@@ -235,13 +235,6 @@ namespace DebuggerTests
             processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(DebuggerResources.TrailWindow));
             Assert.AreEqual(0, processes.Length, "Window process was not closed.");
         }
-
-        public class LogData
-        {
-            public string Name { get; set; }
-            public int Value { get; set; }
-        }
-
 
 
         /// <summary>
