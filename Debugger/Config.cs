@@ -86,6 +86,22 @@ namespace Debugger
                 RaisePropertyChangedEvent(nameof(IsDumpActive));
             }
         }
+
+        /// <summary>
+        ///     Gets or sets a value indicating whether this instance is verbose.
+        /// </summary>
+        /// <value>
+        ///     <c>true</c> if this instance is verbose; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsVerbose
+        {
+            get => DebugRegister.IsVerbose;
+            set
+            {
+                DebugRegister.IsVerbose = value;
+                RaisePropertyChangedEvent(nameof(IsVerbose));
+            }
+        }
     }
 
     /// <inheritdoc />
@@ -127,7 +143,11 @@ namespace Debugger
         public string ErrorColor
         {
             get => DebugRegister.ErrorColor;
-            set => DebugRegister.ErrorColor = value;
+            set
+            {
+                DebugRegister.ErrorColor = value;
+                RaisePropertyChangedEvent(nameof(ErrorColor));
+            }
         }
 
         /// <summary>
@@ -149,7 +169,11 @@ namespace Debugger
         public string InformationColor
         {
             get => DebugRegister.InformationColor;
-            set => DebugRegister.InformationColor = value;
+            set
+            {
+                DebugRegister.InformationColor = value;
+                RaisePropertyChangedEvent(nameof(InformationColor));
+            }
         }
 
         /// <summary>
@@ -158,7 +182,11 @@ namespace Debugger
         public string ExternalColor
         {
             get => DebugRegister.ExternalColor;
-            set => DebugRegister.ExternalColor = value;
+            set
+            {
+                DebugRegister.ExternalColor = value;
+                RaisePropertyChangedEvent(nameof(ExternalColor));
+            }
         }
 
         /// <summary>
@@ -167,7 +195,11 @@ namespace Debugger
         public string StandardColor
         {
             get => DebugRegister.StandardColor;
-            set => DebugRegister.StandardColor = value;
+            set
+            {
+                DebugRegister.StandardColor = value;
+                RaisePropertyChangedEvent(nameof(StandardColor));
+            }
         }
 
         /// <summary>
@@ -179,7 +211,11 @@ namespace Debugger
         public List<ColorOption> ColorOptions
         {
             get => DebugRegister.ColorOptions;
-            set => DebugRegister.ColorOptions = value;
+            set
+            {
+                DebugRegister.ColorOptions = value;
+                RaisePropertyChangedEvent(nameof(ColorOptions));
+            }
         }
 
         /// <summary>
