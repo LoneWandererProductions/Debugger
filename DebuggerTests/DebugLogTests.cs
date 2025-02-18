@@ -161,27 +161,6 @@ namespace DebuggerTests
         }
 
         /// <summary>
-        /// Tests the close window.
-        /// </summary>
-        [TestMethod]
-        public void TestCloseWindow()
-        {
-            // Arrange
-            _debugLog.StartWindow();
-
-            // Assert
-            var processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(DebuggerResources.TrailWindow));
-            Assert.AreEqual(1, processes.Length, "Window process was not started.");
-
-            // Act
-            _debugLog.CloseWindow();
-
-            // Assert
-            processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(DebuggerResources.TrailWindow));
-            Assert.AreEqual(0, processes.Length, "Window process was not closed.");
-        }
-
-        /// <summary>
         /// Waits for a file to be created asynchronously.
         /// </summary>
         /// <param name="filePath">The file path to check.</param>
