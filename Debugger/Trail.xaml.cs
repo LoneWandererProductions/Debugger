@@ -64,7 +64,7 @@ namespace Debugger
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The routed event arguments.</param>
-        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             //if no file is loaded just return
             if (DebugRegister.DebugPath == null) return;
@@ -74,7 +74,7 @@ namespace Debugger
 
             DebugProcessing.StartDebug();
 
-            var path = await DebugHelper.GetLogFile(DebugRegister.DebugPath);
+            var path = DebugHelper.GetLogFile(DebugRegister.DebugPath);
             //Tell them that we started.
             DebugProcessing.DebugLogEntry(DebuggerResources.InformationCreateLogFile, ErCode.Information,
                 DebuggerResources.ManualStart, path);
@@ -197,13 +197,13 @@ namespace Debugger
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The routed event arguments.</param>
-        private async void MenStart_Click(object sender, RoutedEventArgs e)
+        private void MenStart_Click(object sender, RoutedEventArgs e)
         {
             //get index
             _index = ReadLines(DebugRegister.DebugPath).Count();
             DebugProcessing.StartDebug();
 
-            var path = await DebugHelper.GetLogFile(DebugRegister.DebugPath);
+            var path = DebugHelper.GetLogFile(DebugRegister.DebugPath);
             //Tell them we started
             DebugProcessing.DebugLogEntry(DebuggerResources.InformationCreateLogFile, ErCode.Information,
                 DebuggerResources.ManualStart, path);
