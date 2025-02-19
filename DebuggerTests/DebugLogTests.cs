@@ -21,29 +21,9 @@ namespace DebuggerTests
     [TestClass]
     public class DebugLogTests
     {
-        /// <summary>
-        /// The test debug path
-        /// </summary>
-        private const string TestDebugPath = "test_debug";
-
-        /// <summary>
-        /// The delete debug path
-        /// </summary>
-        private const string DeleteDebugPath = "delete_debug";
-
-        /// <summary>
-        /// The delete debug path
-        /// </summary>
-        private const string BehaviourDebugPath = "Behaviour_debug";
-
-        /// <summary>
-        ///     The directory where log files are stored.
-        /// </summary>
+        private const string TestDebugName = "test_debug.log";
+        private const string DeleteDebugName = "delete_debug.log";
         private static readonly string LogDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DebuggerResources.LogPath);
-
-        /// <summary>
-        /// The debug log
-        /// </summary>
         private DebugLog _debugLog;
 
         /// <summary>
@@ -53,7 +33,7 @@ namespace DebuggerTests
         public void Setup()
         {
             _debugLog = new DebugLog();
-            DebugRegister.DebugPath = TestDebugPath; // Simulate Debug Path
+            DebugRegister.DebugName = TestDebugName;
             _debugLog.Start();
         }
 
@@ -63,10 +43,8 @@ namespace DebuggerTests
         [TestCleanup]
         public void Cleanup()
         {
-            if (File.Exists(TestDebugPath))
-            {
-                File.Delete(TestDebugPath);
-            }
+            DeleteLogFile(TestDebugName);
+            DeleteLogFile(DeleteDebugName);
         }
 
         /// <summary>
@@ -75,28 +53,17 @@ namespace DebuggerTests
         [TestMethod]
         public async Task TestDeleteLogFile()
         {
-            DebugRegister.DebugPath = DeleteDebugPath; // Simulate Debug Path
-
-            // Arrange
+            DebugRegister.DebugName = DeleteDebugName;
             var errorMessage = "Test Error";
             var errorLevel = ErCode.Error;
 
-            // Act
             await Task.Run(() => _debugLog.LogFile(errorMessage, errorLevel));
-            
-            // Arrange
-            File.WriteAllText(TestDebugPath, "Test Content");
-
-            // Act
+            File.WriteAllText(TestDebugName, "Test Content");
             _debugLog.Delete();
 
-            var target = Path.Combine(LogDirectory, DeleteDebugPath + ".log");
-
-            // Assert
+            var target = Path.Combine(LogDirectory, DeleteDebugName);
             Assert.IsFalse(await WaitForFileCreationAsync(target), "Log file was not deleted.");
-
-            //restore old path
-            DebugRegister.DebugPath = TestDebugPath; // Simulate Debug Path
+            DebugRegister.DebugName = TestDebugName;
         }
 
         /// <summary>
@@ -105,19 +72,13 @@ namespace DebuggerTests
         [TestMethod]
         public async Task TestLogFileCreation()
         {
-            // Arrange
             var errorMessage = "Test Error";
             var errorLevel = ErCode.Error;
 
-            // Act
             await Task.Run(() => _debugLog.LogFile(errorMessage, errorLevel));
+            var target = Path.Combine(LogDirectory, TestDebugName);
 
-            var target = Path.Combine(LogDirectory, TestDebugPath + ".log");
-            // Assert
-            // Assert file existence with polling
-            var fileExists = await WaitForConditionAsync(() => File.Exists(target), TimeSpan.FromSeconds(2));
             Assert.IsTrue(await WaitForFileCreationAsync(target), "Log file was not created.");
-
             var content = File.ReadAllText(target);
             Assert.IsTrue(content.Contains(errorMessage), "Error message was not logged.");
         }
@@ -128,17 +89,13 @@ namespace DebuggerTests
         [TestMethod]
         public void TestStartStopDebugging()
         {
-            // Arrange
             DebugRegister.IsRunning = false;
-
-            // Act
             _debugLog.Start();
             var isRunningAfterStart = DebugRegister.IsRunning;
 
             _debugLog.StopDebugging();
             var isRunningAfterStop = DebugRegister.IsRunning;
 
-            // Assert
             Assert.IsTrue(isRunningAfterStart, "Debugging did not start.");
             Assert.IsFalse(isRunningAfterStop, "Debugging did not stop.");
         }
@@ -149,23 +106,18 @@ namespace DebuggerTests
         [TestMethod]
         public void TestInitiateWindow()
         {
-            // Act
             _debugLog.StartWindow();
-
-            // Assert
             var processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(DebuggerResources.TrailWindow));
             Assert.IsTrue(processes.Length > 0, "Window process was not started.");
-
-            // Cleanup
             _debugLog.CloseWindow();
         }
 
         /// <summary>
-        /// Waits for a file to be created asynchronously.
+        /// Waits for file creation asynchronous.
         /// </summary>
-        /// <param name="filePath">The file path to check.</param>
-        /// <param name="timeout">The timeout duration.</param>
-        /// <returns>True if the file was created; otherwise, false.</returns>
+        /// <param name="filePath">The file path.</param>
+        /// <param name="timeout">The timeout.</param>
+        /// <returns></returns>
         private static async Task<bool> WaitForFileCreationAsync(string filePath, TimeSpan? timeout = null)
         {
             var effectiveTimeout = timeout ?? TimeSpan.FromSeconds(10);
@@ -173,36 +125,21 @@ namespace DebuggerTests
 
             while ((DateTime.Now - start) < effectiveTimeout)
             {
-                if (File.Exists(filePath))
-                {
-                    return true;
-                }
-
-                await Task.Delay(50); // Polling interval
+                if (File.Exists(filePath)) return true;
+                await Task.Delay(50);
             }
 
             return false;
         }
 
-
         /// <summary>
-        /// Waits for condition asynchronous.
+        /// Deletes the log file.
         /// </summary>
-        /// <param name="condition">The condition.</param>
-        /// <param name="timeout">The timeout.</param>
-        /// <returns>Wait time is over</returns>
-        private static async Task<bool> WaitForConditionAsync(Func<bool> condition, TimeSpan timeout)
+        /// <param name="logName">Name of the log.</param>
+        private static void DeleteLogFile(string logName)
         {
-            var start = DateTime.Now;
-            while ((DateTime.Now - start) < timeout)
-            {
-                if (condition())
-                    return true;
-
-                await Task.Delay(50); // Polling interval
-            }
-
-            return false;
+            var debugPath = Path.Combine(LogDirectory, $"{logName}{DebuggerResources.LogFileExtension}");
+            if (File.Exists(debugPath)) File.Delete(debugPath);
         }
     }
 }

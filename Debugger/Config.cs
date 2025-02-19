@@ -25,13 +25,13 @@ namespace Debugger
         /// <summary>
         ///     Gets or sets the debug path.
         /// </summary>
-        public string DebugPath
+        public string DebugName
         {
-            get => DebugRegister.DebugPath;
+            get => DebugRegister.DebugName;
             set
             {
-                DebugRegister.DebugPath = value;
-                RaisePropertyChangedEvent(nameof(DebugPath));
+                DebugRegister.DebugName = value;
+                RaisePropertyChangedEvent(nameof(DebugName));
             }
         }
 

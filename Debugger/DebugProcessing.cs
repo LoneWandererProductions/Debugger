@@ -140,8 +140,7 @@ namespace Debugger
 
             if (!string.IsNullOrEmpty(objString))
             {
-                _ = logBuilder.Append(DebuggerResources.ObjectFormatting)
-                    .Append(objString).Append(DebuggerResources.Spacer);
+                _ = logBuilder.Append(DebuggerResources.ObjectFormatting).Append(objString);
             }
 
             if (!string.IsNullOrEmpty(stackTrace))

@@ -24,12 +24,12 @@ namespace Debugger
         /// <summary>
         ///     The file name (const). Value: "DebugLog.txt".
         /// </summary>
-        internal const string FileName = "DebugLog.txt";
+        internal const string FileName = "DebugLog";
 
         /// <summary>
         ///     The file extension (const). Value: "Log Files (*.txt)|*.txt;".
         /// </summary>
-        internal const string FileExt = "Log Files (*.txt)|*.txt;";
+        internal const string FileExt = "Log Files (*.log)|*.log;";
 
         /// <summary>
         ///     Base Text(const). Value: "Color for everything else".

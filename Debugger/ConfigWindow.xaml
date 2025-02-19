@@ -43,7 +43,7 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="5" />
         </Grid.ColumnDefinitions>
-        <Label Content="File Path:" Grid.Column="1" Grid.Row="1" VerticalContentAlignment="Center" />
+        <Label Content="File Name:" Grid.Column="1" Grid.Row="1" VerticalContentAlignment="Center" />
         <Label Content="Suppress Window:" Grid.Column="1" Grid.Row="3" />
         <Label Content="Ticks:" Grid.Column="1" Grid.Row="5" />
         <Label Content="Is Running:" Grid.Column="1" Grid.Row="7" />
@@ -57,7 +57,7 @@
                  TextWrapping="NoWrap"
                  Grid.Column="3"
                  Grid.Row="1"
-                 Text="{Binding DebugPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                 Text="{Binding DebugName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
         <CheckBox Grid.ColumnSpan="5"
                   Grid.Column="3"
                   Grid.Row="3"

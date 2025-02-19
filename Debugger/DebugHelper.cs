@@ -19,40 +19,34 @@ namespace Debugger
     internal static class DebugHelper
     {
         /// <summary>
-        ///     The directory where log files are stored.
-        /// </summary>
-        private static readonly string LogDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
-            DebuggerResources.LogPath);
-
-        /// <summary>
         ///     Gets the log file.
         /// </summary>
         /// <param name="logFile">The log file.</param>
         /// <returns>The Content of the file</returns>
         internal static string GetLogFile(string logFile)
         {
+            var directoryPath = Path.GetDirectoryName(logFile);
+
             // Ensure log directory exists
-            if (!Directory.Exists(LogDirectory))
+            if (!Directory.Exists(directoryPath))
             {
-                _ = Directory.CreateDirectory(LogDirectory);
+                _ = Directory.CreateDirectory(directoryPath);
             }
 
-            var logFilePath = Path.Combine(LogDirectory, $"{logFile}{DebuggerResources.LogFileExtension}");
-
             // Ensure the log file exists
-            if (!File.Exists(logFilePath))
+            if (!File.Exists(logFile))
             {
-                using (File.Create(logFilePath)) { } // Just create and close
+                using (File.Create(logFile)) { } // Just create and close
             }
 
             // Check the file size and rotate if necessary
-            if (new FileInfo(logFilePath).Length <= DebugRegister.MaxFileSize)
+            if (new FileInfo(logFile).Length <= DebugRegister.MaxFileSize)
             {
-                return logFilePath;
+                return logFile;
             }
 
             // Update to the new file path
-            return RotateLogFiles(logFilePath);
+            return RotateLogFiles(logFile);
         }
 
         /// <summary>

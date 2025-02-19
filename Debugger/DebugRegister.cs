@@ -44,9 +44,14 @@ namespace Debugger
         public static bool IsRunning { get; internal set; }
 
         /// <summary>
+        ///     Get the Path to the Debug Name
+        /// </summary>
+        internal static string DebugName { get; set; } = "DebugLog.log";
+
+        /// <summary>
         ///     Get the Path to the Debug File
         /// </summary>
-        internal static string DebugPath { get; set; }
+        internal static string DebugPath => GetPath();
 
         /// <summary>
         ///     Is dump active.
@@ -149,9 +154,11 @@ namespace Debugger
         /// </summary>
         private static ConfigExtended CreateBaseOptions()
         {
+            
+
             return new ConfigExtended
             {
-                DebugPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DebuggerResources.FileName),
+                DebugName = $"{DebuggerResources.FileName}{DebuggerResources.LogFileExtension}",
                 SecondsTick = 1,
                 MinutesTick = 0,
                 HourTick = 0,
@@ -179,6 +186,20 @@ namespace Debugger
         }
 
         /// <summary>
+        /// Gets the path.
+        /// </summary>
+        /// <returns>The path or null, if the name is missing.</returns>
+        private static string GetPath()
+        {
+            if (string.IsNullOrEmpty(DebugName))
+            {
+                return null;
+            }
+
+            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DebuggerResources.LogPath, DebugName);
+        }
+
+        /// <summary>
         ///     Resets this instance.
         /// </summary>
         internal static void Reset()
@@ -192,7 +213,7 @@ namespace Debugger
         /// <param name="config">The config object containing the settings.</param>
         private static void ApplyConfig(ConfigExtended config)
         {
-            DebugPath = config.DebugPath;
+            DebugName = config.DebugName;
             SecondsTick = config.SecondsTick;
             MinutesTick = config.MinutesTick;
             HourTick = config.HourTick;

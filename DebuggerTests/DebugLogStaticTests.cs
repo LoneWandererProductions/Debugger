@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Debugger;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DebuggerTests
@@ -25,12 +26,12 @@ namespace DebuggerTests
         /// <summary>
         /// The test debug path
         /// </summary>
-        private const string TestDebugPath = "test_static_debug";
+        private const string TestDebugName = "test_static_debug.log";
 
         /// <summary>
         /// The delete debug path
         /// </summary>
-        private const string DeleteDebugPath = "delete_static_debug";
+        private const string DeleteDebugName= "delete_static_debug.log";
 
         // The directory where log files are stored
         private static readonly string LogDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DebuggerResources.LogPath);
@@ -42,12 +43,12 @@ namespace DebuggerTests
         public void Setup()
         {
             // Clear any existing log files before each test
-            if (File.Exists(TestDebugPath))
+            if (File.Exists(TestDebugName))
             {
-                File.Delete(TestDebugPath);
+                File.Delete(TestDebugName);
             }
 
-            DebugRegister.DebugPath = TestDebugPath; // Simulate Debug Path
+            DebugRegister.DebugName = TestDebugName; // Simulate Debug Path
             DebugRegister.IsDumpActive = true; // activate dump, my bad....
         }
 
@@ -59,7 +60,7 @@ namespace DebuggerTests
         {
             Debugs.StopDebugging(); // Ensure debugging is stopped
 
-            if (File.Exists(TestDebugPath))
+            if (File.Exists(TestDebugName))
             {
                 //File.Delete(TestDebugPath); // Clean up log file
             }
@@ -79,7 +80,7 @@ namespace DebuggerTests
             var task = Task.Run(() => Debugs.LogFile(errorMessage, errorLevel));
             await task; // Warten, bis die Log-Datei geschrieben wurde
 
-            var target = Path.Combine(LogDirectory, TestDebugPath + ".log");
+            var target = Path.Combine(LogDirectory, TestDebugName);
 
             // Assert mit Polling
             var fileExists = await WaitForConditionAsync(() => File.Exists(target), TimeSpan.FromSeconds(2));
@@ -95,7 +96,7 @@ namespace DebuggerTests
         [TestMethod]
         public async Task TestDeleteLogFile()
         {
-            DebugRegister.DebugPath = DeleteDebugPath; // Simulate Debug Path
+            DebugRegister.DebugName = DeleteDebugName; // Simulate Debug Path
 
             // Arrange
             var errorMessage = "Test Error";
@@ -105,19 +106,19 @@ namespace DebuggerTests
             await Task.Run(() => Debugs.LogFile(errorMessage, errorLevel));
 
             // Arrange
-            File.WriteAllText(TestDebugPath, "Test Content");
+            File.WriteAllText(TestDebugName, "Test Content");
 
             // Act
             Debugs.DeleteLogFile();
 
 
-            var target = Path.Combine(LogDirectory, DeleteDebugPath + ".log");
+            var target = Path.Combine(LogDirectory, DeleteDebugName + ".log");
 
             // Assert
             Assert.IsFalse(File.Exists(target), "Log file was not deleted.");
 
             //restore old path
-            DebugRegister.DebugPath = TestDebugPath; // Simulate Debug Path
+            DebugRegister.DebugName = TestDebugName; // Simulate Debug Path
         }
 
 
@@ -132,11 +133,11 @@ namespace DebuggerTests
             var errorLevel = ErCode.Warning;
             var testObject = new LogData { Name = "Test", Value = 42 };
 
-            // Act
-            var task = Task.Run(() => Debugs.LogFile(errorMessage, errorLevel, testObject));
-            await task; // Ensure the log file is written before proceeding
 
-            var target = Path.Combine(LogDirectory, TestDebugPath + ".log");
+            // Act: Log the message asynchronously
+            await Task.Run(() => Debugs.LogFile(errorMessage, errorLevel, testObject));
+
+            var target = Path.Combine(LogDirectory, TestDebugName);
 
             // Assert with polling
             var fileExists = await WaitForConditionAsync(() => File.Exists(target), TimeSpan.FromSeconds(2));
@@ -157,11 +158,10 @@ namespace DebuggerTests
             var errorLevel = ErCode.Information;
             var testDictionary = new Dictionary<string, int> { { "Key1", 1 }, { "Key2", 2 } };
 
-            // Act
-            var task = Task.Run(() => Debugs.LogFile(errorMessage, errorLevel, testDictionary));
-            await task; // Ensure the log file is written before proceeding
+            // Act: Log the message asynchronously
+            await Task.Run(() => Debugs.LogFile(errorMessage, errorLevel, testDictionary));
 
-            var target = Path.Combine(LogDirectory, TestDebugPath + ".log");
+            var target = Path.Combine(LogDirectory, TestDebugName);
 
             // Assert with polling
             var fileExists = await WaitForConditionAsync(() => File.Exists(target), TimeSpan.FromSeconds(2));
