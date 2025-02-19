@@ -8,6 +8,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Windows.Documents;
 
 namespace Debugger
@@ -23,12 +24,17 @@ namespace Debugger
         private static readonly string LogDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
             DebuggerResources.LogPath);
 
+        /// <summary>
+        ///     Gets the log file.
+        /// </summary>
+        /// <param name="logFile">The log file.</param>
+        /// <returns>The Content of the file</returns>
         internal static string GetLogFile(string logFile)
         {
             // Ensure log directory exists
             if (!Directory.Exists(LogDirectory))
             {
-                Directory.CreateDirectory(LogDirectory);
+                _ = Directory.CreateDirectory(LogDirectory);
             }
 
             var logFilePath = Path.Combine(LogDirectory, $"{logFile}{DebuggerResources.LogFileExtension}");
@@ -45,10 +51,8 @@ namespace Debugger
                 return logFilePath;
             }
 
-            RotateLogFiles(logFilePath);
-            logFilePath = RotateLogFiles(logFilePath); // Update to the new file path
-
-            return logFilePath;
+            // Update to the new file path
+            return RotateLogFiles(logFilePath);
         }
 
         /// <summary>
@@ -59,31 +63,30 @@ namespace Debugger
         /// <param name="found">The string was filtered</param>
         internal static void AddRange(TextRange textRange, string line, bool found)
         {
-            textRange.Text = string.Concat(line, Environment.NewLine);
+            // Get the current TextPointer for the end of the TextRange
+            var endPointer = textRange.End;
 
+            // Create a new TextRange starting from the current position of the TextPointer
+            TextRange newRange = new(endPointer, endPointer)
+            {
+                // Append the new line (including newline)
+                Text = line + Environment.NewLine
+            };
+
+            // Apply background color if needed
             if (found)
             {
-                textRange.ApplyPropertyValue(TextElement.BackgroundProperty, DebugRegister.FoundColor);
+                newRange.ApplyPropertyValue(TextElement.BackgroundProperty, DebugRegister.FoundColor);
             }
 
-            ColorOption option;
+            // Determine the color option based on the line content
+            var option =
+                DebugRegister.ColorOptions.FirstOrDefault(opt =>
+                    line.StartsWith(opt.EntryText, StringComparison.Ordinal))
+                ?? DebugRegister.ColorOptions[0];
 
-            for (var i = 1; i < DebugRegister.ColorOptions.Count; i++)
-            {
-                option = DebugRegister.ColorOptions[i];
-
-                if (!line.StartsWith(option.EntryText, StringComparison.Ordinal))
-                {
-                    continue;
-                }
-
-                textRange.ApplyPropertyValue(TextElement.ForegroundProperty, option.ColorName);
-                return;
-            }
-
-            option = DebugRegister.ColorOptions[0];
-
-            textRange.ApplyPropertyValue(TextElement.ForegroundProperty, option.ColorName);
+            // Apply the foreground color
+            newRange.ApplyPropertyValue(TextElement.ForegroundProperty, option.ColorName);
         }
 
         /// <summary>

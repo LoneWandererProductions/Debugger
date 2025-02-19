@@ -110,12 +110,15 @@ namespace Debugger
 
             var lst = ReadLines(DebugRegister.DebugPath).ToList();
 
+
             foreach (var line in lst.GetRange(_counter - diff, diff))
             {
                 var textRange = new TextRange(Log.Document.ContentEnd, Log.Document.ContentEnd);
 
                 DebugHelper.AddRange(textRange, line, false);
             }
+
+            Log.ScrollToEnd();
 
             _index = _counter;
         }
@@ -288,6 +291,8 @@ namespace Debugger
                 }
             });
 
+            Log.ScrollToEnd();
+
             //set index
             _index = ReadLines(DebugRegister.DebugPath).Count();
             DebugProcessing.StartDebug();
@@ -323,6 +328,8 @@ namespace Debugger
 
                 DebugHelper.AddRange(textRange, line, check);
             }
+
+            Log.ScrollToEnd();
 
             //set index
             _index = ReadLines(DebugRegister.DebugPath).Count();

@@ -45,10 +45,10 @@
                 Command="{Binding ConnectCommand}" />
         <Button Content="Close" Grid.Column="3" HorizontalAlignment="Left" Grid.Row="7" VerticalAlignment="Top"
                 Command="{Binding CloseCommand}" />
-        <commonControls:ScrollingTextBoxes Grid.ColumnSpan="2" Grid.Column="2" HorizontalAlignment="Stretch"
+        <TextBox Grid.ColumnSpan="2" Grid.Column="2" HorizontalAlignment="Stretch"
                                            Grid.Row="9"
                                            TextWrapping="Wrap"
-                                           VerticalAlignment="Stretch" AutoScrolling="True"
+                                           VerticalAlignment="Stretch"
                                            Text="{Binding Path=Log, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                                            IsEnabled="True" />
     </Grid>
