@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -181,6 +182,8 @@ namespace Debugger
             try
             {
                 await File.AppendAllTextAsync(logFile, $"{logMessage}{Environment.NewLine}");
+
+                //File.WriteAllText(logFile, $"{logMessage}{Environment.NewLine}");
             }
             finally
             {
