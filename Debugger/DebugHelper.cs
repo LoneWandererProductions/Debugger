@@ -36,7 +36,8 @@ namespace Debugger
             // Ensure the log file exists
             if (!File.Exists(logFile))
             {
-                using (File.Create(logFile)) { } // Just create and close
+                using var stream = new FileStream(logFile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+                stream.Close();
             }
 
             // Check the file size and rotate if necessary
